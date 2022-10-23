@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * Cordova (Android) plugin for accessing the power-management functions of the device
- * @author Wolfgang Koller <viras@users.sourceforge.net>
- */
 package org.apache.cordova.powermanagement;
 
 import org.json.JSONArray;
@@ -49,39 +45,40 @@ public class PowerManagement extends CordovaPlugin {
 	@Override
 	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
 		super.initialize(cordova, webView);
-
 		this.powerManager = (PowerManager) cordova.getActivity().getSystemService(Context.POWER_SERVICE);
 	}
 
 	@Override
-	public boolean execute(String action, JSONArray args,
-			CallbackContext callbackContext) throws JSONException {
+	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
 
 		PluginResult result = null;
-		Log.d("PowerManagementPlugin", "Plugin execute called - " + this.toString() );
+		Log.d("PowerManagementPlugin", "Plugin execute called - " + this.toString());
 		Log.d("PowerManagementPlugin", "Action is " + action );
 
 		try {
-			if( action.equals("acquire") ) {
-				if( args.length() > 0 && args.getBoolean(0) ) {
+			if (action.equals("acquire")) {
+				if (args.length() > 0 && args.getBoolean(0)) {
 					Log.d("PowerManagementPlugin", "Only dim lock" );
-					result = this.acquire( PowerManager.SCREEN_DIM_WAKE_LOCK );
+					result = this.acquire(PowerManager.SCREEN_DIM_WAKE_LOCK);
+
+				} else {
+					result = this.acquire(PowerManager.FULL_WAKE_LOCK);
 				}
-				else {
-					result = this.acquire( PowerManager.FULL_WAKE_LOCK );
-				}
-			} else if( action.equals("release") ) {
+
+			} else if (action.equals("release")) {
 				result = this.release();
-			} else if( action.equals("setReleaseOnPause") ) {
+
+			} else if (action.equals("setReleaseOnPause")) {
 				try {
 					this.releaseOnPause = args.getBoolean(0);
 					result = new PluginResult(PluginResult.Status.OK);
+
 				} catch (Exception e) {
 					result = new PluginResult(PluginResult.Status.ERROR, "Could not set releaseOnPause");
 				}
 			}
-		}
-		catch( JSONException e ) {
+
+		} catch (JSONException e) {
 			result = new PluginResult(Status.JSON_EXCEPTION, e.getMessage());
 		}
 
@@ -94,7 +91,7 @@ public class PowerManagement extends CordovaPlugin {
 	 * @param p_flags Type of wake-lock to acquire
 	 * @return PluginResult containing the status of the acquire process
 	 */
-	private PluginResult acquire( int p_flags ) {
+	private PluginResult acquire(int p_flags) {
 		PluginResult result = null;
 
 		if (this.wakeLock == null) {
@@ -122,18 +119,17 @@ public class PowerManagement extends CordovaPlugin {
 	private PluginResult release() {
 		PluginResult result = null;
 
-		if( this.wakeLock != null ) {
+		if (this.wakeLock != null ) {
 			try {
 				this.wakeLock.release();
 				result = new PluginResult(PluginResult.Status.OK, "OK");
-			}
-			catch (Exception e) {
+
+			} catch (Exception e) {
 				result = new PluginResult(PluginResult.Status.ILLEGAL_ACCESS_EXCEPTION, "WakeLock already released");
 			}
-
 			this.wakeLock = null;
-		}
-		else {
+
+		} else {
 			result = new PluginResult(PluginResult.Status.ILLEGAL_ACCESS_EXCEPTION, "No WakeLock active - acquire first");
 		}
 
@@ -145,10 +141,9 @@ public class PowerManagement extends CordovaPlugin {
 	 */
 	@Override
 	public void onPause(boolean multitasking) {
-		if( this.releaseOnPause && this.wakeLock != null ) {
+		if (this.releaseOnPause && this.wakeLock != null) {
 			this.wakeLock.release();
 		}
-
 		super.onPause(multitasking);
 	}
 
@@ -157,10 +152,9 @@ public class PowerManagement extends CordovaPlugin {
 	 */
 	@Override
 	public void onResume(boolean multitasking) {
-		if( this.releaseOnPause && this.wakeLock != null ) {
+		if (this.releaseOnPause && this.wakeLock != null) {
 			this.wakeLock.acquire();
 		}
-
 		super.onResume(multitasking);
 	}
 }
